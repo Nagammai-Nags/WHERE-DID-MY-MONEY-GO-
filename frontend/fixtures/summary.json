@@ -1,0 +1,25 @@
+{
+  "period": {"from": "2026-10-01", "to": "2026-10-31"},
+  "net_spend_minor": 591800,
+  "income_minor": 825000,
+  "transactions_counted": 14,
+  "by_category": [
+    {"category": "Transport", "total_minor": 142000, "count": 2, "pct_bp": 2399},
+    {"category": "Groceries", "total_minor": 135000, "count": 1, "pct_bp": 2281},
+    {"category": "Food", "total_minor": 105000, "count": 7, "pct_bp": 1774},
+    {"category": "Shopping", "total_minor": 79900, "count": 1, "pct_bp": 1350},
+    {"category": "Entertainment", "total_minor": 64900, "count": 1, "pct_bp": 1096},
+    {"category": "Bills", "total_minor": 50000, "count": 1, "pct_bp": 844},
+    {"category": "Uncategorized", "total_minor": 15000, "count": 1, "pct_bp": 253}
+  ],
+  "top_merchants": [
+    {"display_merchant": "BigBasket", "total_minor": 135000, "count": 1},
+    {"display_merchant": "IRCTC", "total_minor": 120000, "count": 1},
+    {"display_merchant": "Amazon Pay", "total_minor": 79900, "count": 1},
+    {"display_merchant": "Netflix", "total_minor": 64900, "count": 1},
+    {"display_merchant": "Swiggy", "total_minor": 54000, "count": 2}
+  ],
+  "small_payments": {"threshold_minor": 10000, "count": 5, "total_minor": 22000},
+  "uncategorized_minor": 15000,
+  "unknown_merchant_count": 1
+}
