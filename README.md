@@ -40,7 +40,7 @@ The application database defaults to `data/wdmmg.db`; set `WDMMG_DB` to override
 
 ## Frontend
 
-The vanilla JavaScript frontend includes Import, Review merchants, Dashboard, Transactions, Sankey, Budget, and Assistant screens.
+The vanilla JavaScript frontend includes Import, Review merchants, Dashboard, Transactions, Graph Analytics, Sankey, Budget, and Assistant screens.
 
 Member 3 owns:
 
@@ -55,6 +55,7 @@ Member 4 owns:
 
 - `frontend/budget.js`
 - `frontend/assistant.js`
+- `frontend/graph_analytics.js`
 
 The frontend displays values supplied by the API and does not calculate financial totals.
 
