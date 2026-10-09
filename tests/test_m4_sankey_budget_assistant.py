@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from backend.budget.budget import compute_status
 from backend.budget.api_budget import _validate_limit_minor, _validate_optional_month
 from backend.assistant.assistant import answer_question, validate_answer
@@ -286,3 +288,31 @@ def test_validate_answer_rejects_unbacked_rupee_amount(monkeypatch):
 
     assert validate_answer(result)
     assert not validate_answer(tampered)
+
+
+def test_member4_frontend_integration_globals_exist():
+    root = Path(__file__).resolve().parents[1]
+    budget_js = (root / "frontend" / "budget.js").read_text()
+    assistant_js = (root / "frontend" / "assistant.js").read_text()
+
+    assert "window.WDMMG_BudgetPanel = { mount, refresh };" in budget_js
+    assert 'apiClient().get(`/budget${query}`)' in budget_js
+    assert 'apiClient().put("/budget", payload)' in budget_js
+
+    assert "window.WDMMG_AssistantPanel = { mount };" in assistant_js
+    assert 'apiClient().post("/assistant/query", { question })' in assistant_js
+    assert "Where did most of my money go this month?" in assistant_js
+
+
+def test_member4_backend_router_exports_are_available():
+    from backend.assistant import api_assistant
+    from backend.budget import api_budget
+    import backend.sankey as sankey_api
+
+    assert hasattr(api_assistant, "router")
+    assert hasattr(api_budget, "router")
+    assert hasattr(sankey_api, "router")
+    assert callable(api_assistant.query_assistant)
+    assert callable(api_budget.get_budget)
+    assert callable(api_budget.put_budget)
+    assert callable(sankey_api.get_sankey)
