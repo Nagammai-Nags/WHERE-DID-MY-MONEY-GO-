@@ -1,0 +1,4 @@
+{"items": [
+  {"group_key": "vpa:rajesh77@oksbi", "identifier_type": "VPA", "identifier_value": "rajesh77@oksbi", "raw_examples": ["UPI-RAJESH K-rajesh77@oksbi"], "txn_count": 1, "total_minor": 15000},
+  {"group_key": "vpa:q8812@ybl", "identifier_type": "VPA", "identifier_value": "q8812@ybl", "raw_examples": ["UPI-Q8812@ybl", "q8812@ybl"], "txn_count": 4, "total_minor": 13000}
+]}
