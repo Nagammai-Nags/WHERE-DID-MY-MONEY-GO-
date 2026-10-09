@@ -1,6 +1,7 @@
 """Member 2 ingestion coverage; integration cases activate after M1/M4 land."""
 
 import importlib.util
+from pathlib import Path
 
 import pytest
 
@@ -22,6 +23,7 @@ Rs.500.00 credited to A/c XX1234 on 04-10-2026 from VPA allowance@okaxis (Allowa
 """
 
 _SHARED_READY = importlib.util.find_spec("backend.models") is not None
+_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_normalization_and_vpa_extraction() -> None:
@@ -60,6 +62,22 @@ def test_paste_parser_ignores_non_transaction_blocks() -> None:
     assert parsed[0]["counterparty_raw"] == "q8812@ybl (Tea Stall)"
     assert parsed[0]["txn_type"] == "EXPENSE"
     assert parsed[1]["txn_type"] == "INCOME"
+
+
+def test_member4_sample_files_match_the_ingestion_contract() -> None:
+    csv_text = (_ROOT / "data" / "sample_transactions.csv").read_text(encoding="utf-8")
+    messages_text = (_ROOT / "data" / "sample_messages.txt").read_text(encoding="utf-8")
+    csv_rows, csv_rejected = parse_csv_text(csv_text)
+    message_rows, message_rejected, ignored = parse_paste_text(messages_text)
+
+    assert len(csv_rows) == 14
+    assert csv_rejected == []
+    assert len(message_rows) == 4
+    assert message_rejected == []
+    assert ignored == 1
+    assert csv_rows[4]["vpa"] == "uber@axisbank"
+    assert message_rows[0]["upi_ref"] == "600000000005"  # duplicate of CSV Uber
+    assert message_rows[1]["vpa"] == "q8812@ybl"
 
 
 @pytest.mark.skipif(not _SHARED_READY, reason="requires Member 1 models/repository and Member 4 sample data")
