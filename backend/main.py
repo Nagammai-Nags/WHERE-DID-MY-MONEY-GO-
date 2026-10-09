@@ -16,6 +16,7 @@ from .models import ApiError
 OPTIONAL_ROUTERS = (
     ("backend.ingestion.api_ingest", "router"),
     ("backend.sankey", "router"),
+    ("backend.graph_analytics", "router"),
     ("backend.budget.api_budget", "router"),
     ("backend.assistant.api_assistant", "router"),
 )

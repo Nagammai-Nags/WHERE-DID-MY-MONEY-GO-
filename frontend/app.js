@@ -210,6 +210,7 @@
       if (name === "dashboard") loadDashboard();
       if (name === "transactions") loadTransactions();
       if (name === "review") loadReview();
+      if (name === "graphs" && window.WDMMG_GraphAnalytics?.mount) window.WDMMG_GraphAnalytics.mount($("#graph-analytics-panel"));
       if (name === "assistant" && window.WDMMG_AssistantPanel?.mount) window.WDMMG_AssistantPanel.mount($("#assistant-panel"));
     }));
     $$('[data-go]').forEach((link) => link.addEventListener("click", (event) => { event.preventDefault(); goTo(link.dataset.go); }));
@@ -259,5 +260,6 @@
     if (window.WDMMG_BudgetPanel?.mount) window.WDMMG_BudgetPanel.mount($("#budget-panel"));
     if (!window.WDMMG_BudgetPanel) $("#budget-panel").innerHTML = '<div class="panel-unavailable">Budget panel will appear here.</div>';
     if (!window.WDMMG_AssistantPanel) $("#assistant-panel").innerHTML = '<div class="panel-unavailable">Assistant panel will appear here.</div>';
+    if (!window.WDMMG_GraphAnalytics) $("#graph-analytics-panel").innerHTML = '<div class="panel-unavailable">Graph Analytics will appear here.</div>';
   });
 })();

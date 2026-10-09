@@ -3,6 +3,7 @@
   const mock = new URLSearchParams(window.location.search).get("mock") === "1";
   const fixtures = {
     "/analytics/summary": "/frontend/fixtures/summary.json",
+    "/analytics/graph": "/frontend/fixtures/graph_analytics.json",
     "/analytics/sankey": "/frontend/fixtures/sankey.json",
     "/transactions": "/frontend/fixtures/transactions.json",
     "/merchants/review-queue": "/frontend/fixtures/review_queue.json",

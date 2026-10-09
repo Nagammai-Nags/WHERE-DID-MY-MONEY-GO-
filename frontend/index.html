@@ -21,6 +21,7 @@
         <button class="tab" role="tab" data-tab="import">Import</button>
         <button class="tab" role="tab" data-tab="review">Review merchants <span id="review-count" class="tab-count"></span></button>
         <button class="tab active" role="tab" data-tab="dashboard">Dashboard</button>
+        <button class="tab" role="tab" data-tab="graphs">Graph Analytics</button>
         <button class="tab" role="tab" data-tab="transactions">Transactions</button>
         <button class="tab" role="tab" data-tab="assistant">Assistant <span class="prototype-badge">Rule-based prototype</span></button>
       </nav>
@@ -55,6 +56,11 @@
             <div id="transactions-list"><div class="loading">Loading transactions…</div></div>
           </section>
 
+          <section class="page" data-page="graphs" hidden>
+            <div class="page-heading"><div><p class="eyebrow">CUSTOM ANALYTICS</p><h1>Graph Analytics</h1><p class="subheading">Pick a date range and inspect computed spending trends, categories, merchants, and transactions.</p></div></div>
+            <div id="graph-analytics-panel"></div>
+          </section>
+
           <section class="page" data-page="assistant" hidden>
             <div class="page-heading"><div><p class="eyebrow">ASK ABOUT YOUR SPENDING</p><h1>Money, explained</h1><p class="subheading">Answers use the figures already computed from your transactions.</p></div><span class="prototype-badge large">Rule-based prototype</span></div>
             <div id="assistant-panel"></div>
@@ -78,6 +84,7 @@
   <script src="/frontend/api.js"></script>
   <script src="/frontend/budget.js"></script>
   <script src="/frontend/assistant.js"></script>
+  <script src="/frontend/graph_analytics.js"></script>
   <script src="/frontend/charts.js"></script>
   <script src="/frontend/app.js"></script>
 </body>
