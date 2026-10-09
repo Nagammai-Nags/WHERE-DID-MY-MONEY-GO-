@@ -1,0 +1,19 @@
+{
+  "reference_month": "2026-10",
+  "rows_after_sample_import": 17,
+  "sample_import": {"rows_found": 18, "imported": 17, "duplicates": 1, "rejected": 0, "ignored": 1, "unknown_merchants": 5},
+  "state_a": {"net_spend_minor": 591800, "income_minor": 825000, "uncategorized_minor": 28000, "unknown_merchant_count": 5,
+              "small_payments": {"count": 5, "total_minor": 22000}},
+  "state_b": {"net_spend_minor": 591800, "income_minor": 825000, "uncategorized_minor": 15000, "unknown_merchant_count": 1,
+              "by_category": {"Transport": 142000, "Groceries": 135000, "Food": 105000, "Shopping": 79900,
+                              "Entertainment": 64900, "Bills": 50000, "Uncategorized": 15000},
+              "transactions_updated_by_tea_stall": 4, "sankey_nodes": 19, "sankey_links": 18, "unspent_minor": 233200},
+  "state_c": {"rows": 18, "net_spend_minor": 595800, "food_minor": 109000, "small_payments": {"count": 6, "total_minor": 26000}},
+  "budget_cases": [
+    {"limit_minor": 1000000, "remaining_minor": 408200, "pct_bp": 5918, "status": "OK"},
+    {"limit_minor": 750000, "remaining_minor": 158200, "pct_bp": 7890, "status": "OK"},
+    {"limit_minor": 650000, "remaining_minor": 58200, "pct_bp": 9104, "status": "WARNING"},
+    {"limit_minor": 500000, "remaining_minor": -91800, "pct_bp": 11836, "status": "EXCEEDED"}
+  ],
+  "assistant": {"top_category": "Transport", "top_category_minor": 142000, "small_payments_minor": 22000, "small_payments_count": 5}
+}
