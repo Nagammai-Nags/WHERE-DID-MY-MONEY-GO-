@@ -99,6 +99,19 @@ def test_sample_import_dedup_and_alias_journey(client) -> None:
     assert resolved.status_code == 200
     assert resolved.json()["transactions_updated"] == 4
 
+    extra_message = (_ROOT / "data" / "extra_message.txt").read_text(encoding="utf-8")
+    future = client.post("/api/v1/imports", json={"source_type": "PASTE", "text": extra_message})
+    assert future.status_code == 200
+    assert future.json()["imported"] == 1
+    assert future.json()["unknown_merchants"] == 0
+
+    transactions = client.get("/api/v1/transactions", params={"from": "2026-10-09", "to": "2026-10-09"}).json()["items"]
+    assert transactions[0]["display_merchant"] == "Tea stall"
+    assert transactions[0]["merchant_source"] == "USER"
+    assert transactions[0]["category"] == "Food"
+    assert transactions[0]["counterparty_raw"] == "q8812@ybl"
+    assert all("q8812@ybl" not in item["group_key"] for item in client.get("/api/v1/merchants/review-queue").json()["items"])
+
 
 @pytest.mark.skipif(not _SHARED_READY, reason="requires Member 1 app and error handler")
 def test_ingest_validation_contract(client) -> None:
