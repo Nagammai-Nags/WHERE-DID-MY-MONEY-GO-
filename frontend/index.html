@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0B1220">
+  <title>Where Did My Money Go?</title>
+  <link rel="stylesheet" href="/frontend/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#dashboard" aria-label="Where Did My Money Go home">
+        <span class="brand-mark" aria-hidden="true">↗</span>
+        <span><strong>Where did my<br>money go?</strong><small>YOUR MONEY, MADE CLEAR</small></span>
+      </a>
+      <div class="today" id="today-label"></div>
+    </header>
+    <main>
+      <nav class="tabs" role="tablist" aria-label="Main navigation">
+        <button class="tab" role="tab" data-tab="import">Import</button>
+        <button class="tab" role="tab" data-tab="review">Review merchants <span id="review-count" class="tab-count"></span></button>
+        <button class="tab active" role="tab" data-tab="dashboard">Dashboard</button>
+        <button class="tab" role="tab" data-tab="transactions">Transactions</button>
+        <button class="tab" role="tab" data-tab="assistant">Assistant <span class="prototype-badge">Rule-based prototype</span></button>
+      </nav>
+
+      <div class="workspace-layout">
+        <div class="main-content" id="main-content">
+          <section class="page dashboard-home" data-page="dashboard">
+            <div class="page-heading"><div><p class="eyebrow">YOUR SNAPSHOT</p><h1>Dashboard</h1><p class="subheading">Your live dashboard stays beside every section.</p></div></div>
+            <article class="card dashboard-home-card"><span class="dashboard-home-icon" aria-hidden="true">↗</span><div><h2>Your money, always in view</h2><p>The dashboard panel stays open beside your work. Import activity, review an unfamiliar merchant, browse transactions, or ask the assistant without losing sight of your totals and money flow.</p></div><div class="dashboard-shortcuts"><button class="button subtle" data-go="import">Import activity</button><button class="button subtle" data-go="transactions">View transactions</button></div></article>
+          
+            <section class="section-block"><div class="section-title"><div><p class="eyebrow">MONEY FLOW</p><h2>Where it went</h2></div><span class="muted small" id="sankey-period"></span></div><div id="sankey-warning"></div><div id="sankey-chart"><div class="loading">Loading money flow…</div></div></section>
+          </section>
+
+          <section class="page" data-page="import" hidden>
+            <div class="page-heading"><div><p class="eyebrow">ADD YOUR ACTIVITY</p><h1>Bring your transactions in</h1><p class="subheading">Your data stays in this local demo. Paste a message or choose a CSV file.</p></div></div>
+            <div class="two-column">
+              <article class="card"><h2>Paste transaction text</h2><label class="field-label" for="paste-text">Messages or statement text</label><textarea id="paste-text" rows="9" placeholder="Paste transaction messages here…"></textarea><div class="actions"><button class="button primary" id="paste-import">Import pasted text</button><button class="button subtle" id="sample-import">Load sample data</button></div></article>
+              <article class="card"><h2>Import a CSV file</h2><p class="muted">Choose a CSV file from your device. The file is read as text before it is sent for import.</p><label class="file-drop" for="csv-file"><span class="file-icon">↑</span><strong>Choose a CSV file</strong><span>CSV format</span><input id="csv-file" type="file" accept=".csv,text/csv"></label><div id="file-name" class="muted small"></div></article>
+            </div>
+            <div class="card reset-card"><div><h2>Start over</h2><p class="muted">Clear transactions, merchant names, and budget from this demo.</p></div><button class="button danger-outline" id="reset-demo">Reset demo data</button></div>
+            <div id="import-result" class="result-slot" aria-live="polite"></div>
+          </section>
+
+          <section class="page" data-page="review" hidden>
+            <div class="page-heading"><div><p class="eyebrow">YOUR MERCHANT MEMORY</p><h1>Review merchants</h1><p class="subheading">Name an unfamiliar payee once. Your correction updates matching transactions.</p></div></div>
+            <div id="review-list" class="stack" aria-live="polite"><div class="loading">Loading merchants…</div></div>
+          </section>
+
+          <section class="page" data-page="transactions" hidden>
+            <div class="page-heading"><div><p class="eyebrow">THE DETAILS</p><h1>Transactions</h1><p class="subheading">Your original payee text stays visible alongside its recognized name.</p></div></div>
+            <div class="toolbar"><label class="search-box"><span>⌕</span><input id="txn-search" type="search" placeholder="Search merchant or category"></label><label class="filter-label">Type <select id="txn-type"><option value="">All activity</option><option>EXPENSE</option><option>INCOME</option><option>REFUND</option><option>TRANSFER_OUT</option><option>TRANSFER_IN</option><option>IGNORED</option></select></label></div>
+            <div id="transactions-list"><div class="loading">Loading transactions…</div></div>
+          </section>
+
+          <section class="page" data-page="assistant" hidden>
+            <div class="page-heading"><div><p class="eyebrow">ASK ABOUT YOUR SPENDING</p><h1>Money, explained</h1><p class="subheading">Answers use the figures already computed from your transactions.</p></div><span class="prototype-badge large">Rule-based prototype</span></div>
+            <div id="assistant-panel"></div>
+          </section>
+        </div>
+
+        <aside class="dashboard-panel" id="dashboard-panel" aria-label="Persistent dashboard">
+          <div class="dashboard-panel-heading dashboard-heading"><div><p class="eyebrow">LIVE SNAPSHOT</p><h2>Dashboard</h2><p class="subheading" id="period-label">Your spending at a glance</p></div><span class="live-indicator">LIVE</span></div>
+          <div id="unknown-banner" class="unknown-banner" hidden></div>
+          <div id="dashboard-content"><div class="loading">Loading your summary…</div></div>
+          
+          <section class="section-block budget-block"><div id="budget-panel"></div></section>
+        </aside>
+      </div>
+    </main>
+    <footer>Private by design <span>·</span> Figures come from your transaction data</footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js" onerror="this.dataset.failed='true'"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js" onerror="this.dataset.failed='true'"></script>
+  <script src="/frontend/api.js"></script>
+  <script src="/frontend/budget.js"></script>
+  <script src="/frontend/assistant.js"></script>
+  <script src="/frontend/charts.js"></script>
+  <script src="/frontend/app.js"></script>
+</body>
+</html>
