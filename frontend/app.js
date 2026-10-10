@@ -45,7 +45,7 @@
     const host = $("#dashboard-content");
     $("#period-label").textContent = periodLabel(payload.period);
     const small = payload.small_payments || {};
-    const empty = payload.net_spend_minor === 0;
+    const empty = payload.net_spend_minor === 0 && payload.income_minor === 0;
     $("#unknown-banner").hidden = !(payload.unknown_merchant_count > 0);
     if (payload.unknown_merchant_count > 0) {
       $("#unknown-banner").innerHTML = `<span class="unknown-dot"></span><strong>${payload.unknown_merchant_count} unknown merchant${payload.unknown_merchant_count === 1 ? "" : "s"}</strong><span>need a name</span><a href="#review" data-go="review">Review →</a>`;
@@ -53,8 +53,7 @@
     }
     $("#review-count").textContent = payload.unknown_merchant_count > 0 ? String(payload.unknown_merchant_count) : "";
     if (empty) {
-      host.innerHTML = `<div class="empty-state"><span class="empty-illustration">↘</span><p class="eyebrow">A FRESH START</p><h2>Your story starts with a transaction</h2><p>Import a statement or load the sample data to see your spending take shape.</p><button class="button primary" id="empty-import">Load sample data</button></div>`;
-      $("#empty-import").addEventListener("click", () => sampleImport($("#empty-import")));
+      host.innerHTML = `<div class="empty-state"><span class="empty-illustration">↘</span><p class="eyebrow">A FRESH START</p><h2>Your story starts with a transaction</h2><p>Import a statement or paste transaction messages to see your spending take shape.</p><a class="button primary" href="#import" data-go="import">Import transactions</a></div>`;
       return;
     }
     const categories = Array.isArray(payload.by_category) ? payload.by_category : [];
@@ -95,7 +94,7 @@
         }
       }
     } catch (_) {
-      if (!summaryCache) host.innerHTML = '<div class="error-state">Your summary could not be loaded. Check the connection and try again.</div>';
+      host.innerHTML = '<div class="error-state">Your summary could not be refreshed. Check the connection and try again.</div>';
     }
   }
 
@@ -192,13 +191,10 @@
       renderImportResult(result);
       announce("Import finished");
       await Promise.all([loadDashboard(), loadTransactions(), loadReview()]);
-    } catch (_) {
-      $("#import-result").innerHTML = '<div class="error-state">Import did not finish. Review the message and try again.</div>';
+      if (window.WDMMG_BudgetPanel?.refresh) await window.WDMMG_BudgetPanel.refresh();
+    } catch (error) {
+      $("#import-result").innerHTML = `<div class="error-state">Import failed: ${escapeHTML(error.message || "Check the file and try again.")}</div>`;
     } finally { setBusy(button, false); }
-  }
-
-  function sampleImport(button) {
-    return doImport(button, window.api.post("/imports/sample"));
   }
 
   function bindTabs() {
@@ -225,7 +221,6 @@
       const text = $("#paste-text").value;
       doImport(button, window.api.post("/imports", { source_type: "PASTE", text }));
     });
-    $("#sample-import").addEventListener("click", (event) => sampleImport(event.currentTarget));
     $("#csv-file").addEventListener("change", (event) => {
       const file = event.currentTarget.files && event.currentTarget.files[0];
       if (!file) return;

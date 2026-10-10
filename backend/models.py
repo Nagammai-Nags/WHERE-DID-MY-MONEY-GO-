@@ -33,7 +33,7 @@ class ApiError(Exception):
 
 def rupees_to_minor(text: str) -> int:
     value = text.strip().replace(",", "")
-    value = re.sub(r"^(?:Rs\.?|₹)\s*", "", value, flags=re.IGNORECASE)
+    value = re.sub(r"^(?:Rs\.?|INR|₹)\s*", "", value, flags=re.IGNORECASE)
     try:
         amount = Decimal(value)
     except (InvalidOperation, AttributeError):
@@ -64,7 +64,7 @@ def format_inr(minor: int) -> str:
 
 def parse_date(text: str) -> str:
     value = text.strip()
-    for fmt in ("%d/%m/%Y", "%d-%m-%Y", "%Y-%m-%d"):
+    for fmt in ("%d/%m/%Y", "%m/%d/%Y", "%d-%m-%Y", "%d-%b-%Y", "%d %b %Y", "%d %B %Y", "%Y-%m-%d"):
         try:
             parsed = datetime.strptime(value, fmt).date()
             if parsed.year < 2015:
@@ -73,7 +73,7 @@ def parse_date(text: str) -> str:
         except ValueError as exc:
             if "2015" in str(exc):
                 raise
-    raise ValueError("date must be dd/mm/yyyy, dd-mm-yyyy, or yyyy-mm-dd")
+    raise ValueError("date must use a recognized day/month/year or ISO format")
 
 def signed_spend_minor(t: Mapping[str, object]) -> int:
     amount = int(t["amount_minor"])

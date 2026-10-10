@@ -12,12 +12,28 @@ from .normalize import derive_name_key, extract_vpa, normalize_name
 
 
 _CSV_HEADER = ["date", "description", "amount", "direction", "upi_ref"]
+_CSV_ALIASES = {
+    "date": {"date", "transaction date", "txn date", "trans date", "value date"},
+    "description": {"description", "narration", "transaction details", "transaction description", "transaction remarks", "details", "remarks", "merchant", "payee", "counterparty", "counter party", "name", "particulars"},
+    "amount": {"amount", "txn amount", "transaction amount"},
+    "debit": {"debit", "debit amount", "debit amt", "withdrawal", "withdrawal amount", "withdrawal amt"},
+    "credit": {"credit", "credit amount", "credit amt", "deposit", "deposit amount", "deposit amt"},
+    "direction": {"direction", "dr cr", "dr/cr", "type", "transaction type"},
+    "upi_ref": {"upi ref", "upi reference", "reference", "reference number", "transaction id", "txn id", "rrn"},
+}
 _MESSAGE_RE = re.compile(
     r"Rs\.\s*(?P<amount>[\d,]+(?:\.\d{1,2})?)\s+"
     r"(?P<action>debited\s+from|credited\s+to)\s+A/c\s+\S+\s+on\s+"
     r"(?P<date>\d{2}-\d{2}-\d{4})\s+"
     r"(?P<relation>to|from)\s+VPA\s+(?P<vpa>[a-z0-9._]+@[a-z]+)"
     r"(?:\s*\((?P<name>[^)]+)\))?\s+UPI\s+Ref\s+(?P<upi_ref>\d{12})\.?",
+    re.IGNORECASE | re.DOTALL,
+)
+_PLAIN_MESSAGE_RE = re.compile(
+    r"Your\s+UPI\s+txn\s+of\s+Rs\.?\s*(?P<amount>[\d,]+(?:\.\d{1,2})?)\s+"
+    r"(?P<relation>to|from)\s+(?P<name>.+?)\s+on\s+"
+    r"(?P<date>\d{2}-[A-Za-z]{3}-\d{4})\s+is\s+successful\.?\s+"
+    r"UPI\s+Ref\s+(?P<upi_ref>\d{12})\.?",
     re.IGNORECASE | re.DOTALL,
 )
 
@@ -86,22 +102,69 @@ def _parsed_row(
 
 
 def parse_csv_text(text: str) -> tuple[list[dict], list[dict]]:
-    reader = csv.DictReader(io.StringIO(text))
-    if reader.fieldnames != _CSV_HEADER:
-        raise ValueError("CSV header must be date,description,amount,direction,upi_ref")
+    reader = csv.DictReader(io.StringIO(text.lstrip("\ufeff")))
+    if not reader.fieldnames:
+        raise ValueError("CSV must include a header row")
+
+    def normalize_header(value: str) -> str:
+        return " ".join(re.sub(r"[^a-z0-9]+", " ", value.strip().lower()).split())
+
+    columns = {}
+    for original in reader.fieldnames:
+        normalized = normalize_header(original or "")
+        for canonical, aliases in _CSV_ALIASES.items():
+            if normalized in {normalize_header(alias) for alias in aliases}:
+                columns.setdefault(canonical, original)
+                break
+    if "date" not in columns or "description" not in columns:
+        raise ValueError("CSV needs date and description columns")
+    if "amount" not in columns and not ("debit" in columns or "credit" in columns):
+        raise ValueError("CSV needs an amount, debit, or credit column")
     parsed, rejected = [], []
     for row_number, row in enumerate(reader, start=1):
         try:
-            if not all(row.get(key) is not None for key in _CSV_HEADER):
-                raise ValueError("missing required column")
-            upi_ref = (row["upi_ref"] or "").strip() or None
-            if upi_ref and not re.fullmatch(r"\d{12}", upi_ref):
-                raise ValueError("upi_ref must be 12 digits")
-            if not row["description"].strip():
+            if not any((value or "").strip() for value in row.values() if isinstance(value, str)):
+                continue
+            date_value = row.get(columns["date"], "")
+            description = row.get(columns["description"], "")
+            if not date_value or not date_value.strip():
+                raise ValueError("date is required")
+            if not description or not description.strip():
                 raise ValueError("description is required")
+            ref_column = columns.get("upi_ref")
+            upi_ref = (row.get(ref_column, "") or "").strip() if ref_column else ""
+            upi_ref = upi_ref or None
+            if upi_ref and not re.fullmatch(r"\d{12}", upi_ref):
+                normalized_ref_header = normalize_header(ref_column or "")
+                if normalized_ref_header in {"upi ref", "upi reference", "rrn"}:
+                    raise ValueError("upi_ref must be 12 digits")
+                upi_ref = None
+            direction_value = (row.get(columns.get("direction", ""), "") or "").strip().upper()
+            amount_value = ""
+            direction = {
+                "DR": "DEBIT", "DR.": "DEBIT", "DEBITED": "DEBIT", "WITHDRAWAL": "DEBIT", "PAID": "DEBIT", "PAYMENT": "DEBIT",
+                "CR": "CREDIT", "CR.": "CREDIT", "CREDITED": "CREDIT", "DEPOSIT": "CREDIT", "RECEIVED": "CREDIT",
+            }.get(direction_value, direction_value)
+            if "amount" in columns:
+                amount_value = (row.get(columns["amount"], "") or "").strip()
+            if not amount_value and ("debit" in columns or "credit" in columns):
+                debit_value = (row.get(columns.get("debit", ""), "") or "").strip()
+                credit_value = (row.get(columns.get("credit", ""), "") or "").strip()
+                if debit_value:
+                    amount_value, direction = debit_value, "DEBIT"
+                elif credit_value:
+                    amount_value, direction = credit_value, "CREDIT"
+            if not amount_value:
+                raise ValueError("amount is required")
+            if not direction and amount_value.startswith("-"):
+                direction, amount_value = "DEBIT", amount_value[1:].strip()
+            elif not direction and re.search(r"\b(received|credited|deposit)\b", description, re.IGNORECASE):
+                direction = "CREDIT"
+            elif not direction and re.search(r"\b(paid|debited|withdrawal)\b", description, re.IGNORECASE):
+                direction = "DEBIT"
             parsed.append(_parsed_row(
-                date=row["date"], description=row["description"].strip(),
-                amount=row["amount"], direction_code=row["direction"],
+                date=date_value.strip(), description=description.strip(),
+                amount=amount_value, direction_code=direction,
                 upi_ref=upi_ref, source="CSV",
             ))
         except (ValueError, KeyError) as exc:
@@ -114,11 +177,24 @@ def parse_paste_text(text: str) -> tuple[list[dict], list[dict], int]:
     blocks = [block.strip() for block in re.split(r"\r?\n\s*\r?\n", text.strip()) if block.strip()]
     for message_number, block in enumerate(blocks, start=1):
         match = _MESSAGE_RE.search(block)
+        plain_format = False
+        if not match:
+            match = _PLAIN_MESSAGE_RE.search(block)
+            plain_format = match is not None
         if not match:
             ignored += 1
             continue
         values = match.groupdict()
         try:
+            if plain_format:
+                merchant = values["name"].strip()
+                direction = "DEBIT" if values["relation"].lower() == "to" else "CREDIT"
+                parsed.append(_parsed_row(
+                    date=values["date"], description=block, amount=values["amount"],
+                    direction_code=direction, upi_ref=values["upi_ref"], source="PASTE",
+                    raw_counterparty=merchant, name=merchant,
+                ))
+                continue
             vpa = values["vpa"].lower()
             name = (values.get("name") or "").strip() or None
             raw = f"{vpa} ({name})" if name else vpa

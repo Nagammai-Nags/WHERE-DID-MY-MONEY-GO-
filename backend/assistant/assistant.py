@@ -183,12 +183,17 @@ def answer_question(question: str) -> dict:
             for item in top_three
         )
         facts.append(_fact("Total spending", total_minor, summary.get("transactions_counted")))
-        c1, c2, c3 = top_three
+        first = top_three[0]
         answer = (
-            f"Your top spending category for {month_year} is {c1['category']} at {format_inr(c1['total_minor'])} "
-            f"({_pct_label(c1.get('pct_bp'))}% of {format_inr(total_minor)}). "
-            f"Next: {c2['category']} {format_inr(c2['total_minor'])}, {c3['category']} {format_inr(c3['total_minor'])}."
+            f"Your top spending category for {month_year} is {first['category']} at "
+            f"{format_inr(first['total_minor'])} ({_pct_label(first.get('pct_bp'))}% of {format_inr(total_minor)})."
         )
+        if len(top_three) > 1:
+            next_categories = ", ".join(
+                f"{item['category']} {format_inr(item['total_minor'])}"
+                for item in top_three[1:]
+            )
+            answer += f" Next: {next_categories}."
         caveats = _standard_caveats(summary, facts)
 
     elif intent == "small_txn_total":
@@ -206,12 +211,11 @@ def answer_question(question: str) -> dict:
         if not merchants:
             return _no_data(intent, period)
         facts.extend(_fact(item["display_merchant"], item["total_minor"], item.get("count")) for item in merchants)
-        m1, m2, m3 = merchants
-        answer = (
-            f"Your top merchants for {month_year}: {m1['display_merchant']} {format_inr(m1['total_minor'])}, "
-            f"{m2['display_merchant']} {format_inr(m2['total_minor'])}, "
-            f"{m3['display_merchant']} {format_inr(m3['total_minor'])}."
+        merchant_list = ", ".join(
+            f"{item['display_merchant']} {format_inr(item['total_minor'])}"
+            for item in merchants
         )
+        answer = f"Your top merchants for {month_year}: {merchant_list}."
         caveats = _standard_caveats(summary, facts)
 
     elif intent == "category_total":

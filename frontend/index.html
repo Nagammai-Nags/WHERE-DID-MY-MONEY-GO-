@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0B1220">
   <title>Where Did My Money Go?</title>
-  <link rel="stylesheet" href="/frontend/style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="app-shell">
@@ -38,7 +38,7 @@
           <section class="page" data-page="import" hidden>
             <div class="page-heading"><div><p class="eyebrow">ADD YOUR ACTIVITY</p><h1>Bring your transactions in</h1><p class="subheading">Your data stays in this local demo. Paste a message or choose a CSV file.</p></div></div>
             <div class="two-column">
-              <article class="card"><h2>Paste transaction text</h2><label class="field-label" for="paste-text">Messages or statement text</label><textarea id="paste-text" rows="9" placeholder="Paste transaction messages here…"></textarea><div class="actions"><button class="button primary" id="paste-import">Import pasted text</button><button class="button subtle" id="sample-import">Load sample data</button></div></article>
+              <article class="card"><h2>Paste transaction text</h2><label class="field-label" for="paste-text">Messages or statement text</label><textarea id="paste-text" rows="9" placeholder="Paste transaction messages here…"></textarea><div class="actions"><button class="button primary" id="paste-import">Import pasted text</button></div></article>
               <article class="card"><h2>Import a CSV file</h2><p class="muted">Choose a CSV file from your device. The file is read as text before it is sent for import.</p><label class="file-drop" for="csv-file"><span class="file-icon">↑</span><strong>Choose a CSV file</strong><span>CSV format</span><input id="csv-file" type="file" accept=".csv,text/csv"></label><div id="file-name" class="muted small"></div></article>
             </div>
             <div class="card reset-card"><div><h2>Start over</h2><p class="muted">Clear transactions, merchant names, and budget from this demo.</p></div><button class="button danger-outline" id="reset-demo">Reset demo data</button></div>
@@ -81,11 +81,11 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js" onerror="this.dataset.failed='true'"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js" onerror="this.dataset.failed='true'"></script>
-  <script src="/frontend/api.js"></script>
-  <script src="/frontend/budget.js"></script>
-  <script src="/frontend/assistant.js"></script>
-  <script src="/frontend/graph_analytics.js"></script>
-  <script src="/frontend/charts.js"></script>
-  <script src="/frontend/app.js"></script>
+  <script src="api.js"></script>
+  <script src="budget.js"></script>
+  <script src="assistant.js"></script>
+  <script src="graph_analytics.js"></script>
+  <script src="charts.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

@@ -49,7 +49,6 @@ Member 3 owns:
 - `frontend/api.js`
 - `frontend/app.js`
 - `frontend/charts.js`
-- `frontend/fixtures/*`
 
 Member 4 owns:
 
@@ -58,22 +57,6 @@ Member 4 owns:
 - `frontend/graph_analytics.js`
 
 The frontend displays values supplied by the API and does not calculate financial totals.
-
-### Mock Preview
-
-To preview the frontend with fixtures:
-
-```sh
-python -m http.server 8000
-```
-
-Then open:
-
-```text
-http://localhost:8000/frontend/index.html?mock=1
-```
-
-Mock GET requests load JSON from `frontend/fixtures/`. Mock writes return documented fixture responses and do not persist changes.
 
 ## Tests
 
